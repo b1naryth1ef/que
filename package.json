@@ -1,0 +1,12 @@
+{
+  "name": "que",
+  "version": "0.0.1",
+  "main": "que.js",
+  "dependencies": {
+    "nunjucks": "1.3.4"
+  },
+  "scripts": {
+    "build-js": "browserify que.js -o que.min.js",
+    "build": "npm run build-js"
+  }
+}
