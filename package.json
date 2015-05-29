@@ -8,5 +8,17 @@
   "scripts": {
     "build-js": "browserify que.js -o que.min.js",
     "build": "npm run build-js"
-  }
+  },
+  "description": "a generally underwhelming javascript view/route controller",
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/b1naryth1ef/que.git"
+  },
+  "author": "b1naryth1ef",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/b1naryth1ef/que/issues"
+  },
+  "homepage": "https://github.com/b1naryth1ef/que"
 }
