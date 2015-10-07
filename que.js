@@ -25,17 +25,12 @@ App.prototype.on = function (eventName, func) {
 }
 
 // Render a template with this app in context
-App.prototype.renderTemplate = function (name, obj) {
+App.prototype.render = function (name, obj) {
     var obj = obj || {};
     obj.app = this;
+    obj.window = window;
 
-    nunjucks.render(name, obj);
-
-    if (!this.templates[name]) {
-        console.error("Failed to find template with name: " + name);
-        return "";
-    }
-    return this.templates[name](obj);
+    return nunjucks.render(name, obj);
 }
 
 // Create a new view on this application
@@ -47,6 +42,12 @@ App.prototype.createView = function (name) {
 App.prototype.addView = function (view) {
   view.app = this;
   this.views[view.name] = view;
+
+  // Update any previously added routes
+  for (var route in view.routes) {
+    view.routes[route].app = this;
+  }
+
   $(this).trigger("viewAdded", [this, view]);
   return view;
 }
@@ -59,8 +60,8 @@ App.prototype.run = function (url) {
     for (view in this.views) {
         var view = this.views[view];
 
-        for (route in this.views[view].routes) {
-            var route = this.views[view].routes[route];
+        for (route in view.routes) {
+            var route = view.routes[route];
 
             if (route.match(url)) {
                 return route.call(url);
@@ -96,6 +97,10 @@ View.prototype.call = function (route) {
     return this.routes[route].apply(this, arguments);
 }
 
+View.prototype.render = function () {
+  return this.app.render.apply(this.app, arguments);
+}
+
 var Route = function (view, func, route, regex) {
     this.app = view.app;
     this.view = view;
@@ -104,6 +109,10 @@ var Route = function (view, func, route, regex) {
     this.regex = regex || false;
 
     $(this.view).trigger("routeCreated", [this]);
+}
+
+Route.prototype.render = function () {
+  return this.view.render.apply(this.view, arguments);
 }
 
 Route.prototype.match = function (url) {
@@ -115,7 +124,7 @@ Route.prototype.match = function (url) {
 }
 
 Route.prototype.extract = function (url) {
-    var regMatch = url.match(regEx);
+    var regMatch = url.match(this.regex);
     if (regMatch) {
         regMatch.shift();
         return regMatch;
@@ -126,9 +135,6 @@ Route.prototype.extract = function (url) {
 Route.prototype.call = function (url) {
     this.func.apply(this, [this.extract(url), url, this]);
 }
-
-// Export everything
-var module = {};
 
 module.exports = {
     "App": App,
