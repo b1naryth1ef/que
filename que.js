@@ -40,8 +40,15 @@ App.prototype.renderTemplate = function (name, obj) {
 
 // Create a new view on this application
 App.prototype.createView = function (name) {
-    this.views[name] = new View(this, name);
-    return this.views[name];
+    return this.addView(new View(name));
+}
+
+// Add a view to this application
+App.prototype.addView = function (view) {
+  view.app = this;
+  this.views[view.name] = view;
+  $(this).trigger("viewAdded", [this, view]);
+  return view;
 }
 
 // Called to route the current request to a view
@@ -64,11 +71,9 @@ App.prototype.run = function (url) {
     console.error("could not find router handler!");
 }
 
-var View = function (app, name) {
-    this.app = app;
+var View = function (name) {
     this.name = name;
     this.routes = {};
-    $(this.app).trigger("viewCreated", [this]);
 }
 
 // Bind to events on this view
